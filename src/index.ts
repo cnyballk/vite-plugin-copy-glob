@@ -19,6 +19,7 @@ export interface Target {
 
 export interface Options {
   hook?: string;
+  watch?: boolean;
   enforce?: "pre" | "post";
   globbyOptions?: GlobbyOptions;
   cwd?: string;
@@ -67,6 +68,7 @@ export default function createPlugin(opts: Options): Plugin {
     hook = "writeBundle",
     enforce,
     targets,
+    watch = false,
     cwd = process.cwd(),
     globbyOptions,
   } = opts || {};
@@ -91,6 +93,15 @@ export default function createPlugin(opts: Options): Plugin {
   };
 
   let called = false;
+  if (watch) {
+    plugin["load"] = async function () {
+      targets.map(({ src, dest, rename, flatten, transform }) => {
+        globby(src, globbyOptions).then((matchedPaths) => {
+          matchedPaths.map((path) => this.addWatchFile(path));
+        });
+      });
+    };
+  }
 
   plugin[hook] = async function () {
     // copy once
@@ -104,7 +115,6 @@ export default function createPlugin(opts: Options): Plugin {
     await Promise.all(
       targets.map(({ src, dest, rename, flatten, transform }) => {
         const cp = makeCopy(transform);
-
         const glob = (pattern: string) => {
           let notFlatten = false;
           try {
