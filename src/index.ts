@@ -92,7 +92,6 @@ export default function createPlugin(opts: Options): Plugin {
     return pth;
   };
 
-  let called = false;
   if (watch) {
     plugin["load"] = async function () {
       targets.map(({ src, dest, rename, flatten, transform }) => {
@@ -104,13 +103,6 @@ export default function createPlugin(opts: Options): Plugin {
   }
 
   plugin[hook] = async function () {
-    // copy once
-    if (called) {
-      return;
-    }
-
-    called = true;
-
     const startTime = Date.now();
     await Promise.all(
       targets.map(({ src, dest, rename, flatten, transform }) => {
