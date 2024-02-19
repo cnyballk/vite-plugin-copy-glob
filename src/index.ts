@@ -94,7 +94,7 @@ export default function createPlugin(opts: Options): Plugin {
 
   if (watch) {
     plugin["load"] = async function () {
-      targets.map(({ src, dest, rename, flatten, transform }) => {
+      targets.map(({ src }) => {
         globby(src, globbyOptions).then((matchedPaths) => {
           matchedPaths.map((path) => this.addWatchFile(path));
         });
